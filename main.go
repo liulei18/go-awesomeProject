@@ -210,6 +210,10 @@ func main() {
 
 }
 
+func (p person) wake() {
+
+}
+
 // 定义接口
 type animal interface {
 	description() string
