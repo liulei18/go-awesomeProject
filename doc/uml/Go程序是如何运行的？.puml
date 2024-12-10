@@ -1,0 +1,63 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+title Go程序是如何运行的？
+autonumber
+
+rt0_linux_amd64.s -> asm_amd64.s: _rt0_amd64(SB)
+
+
+===读取命令行参数==
+asm_amd64.s -> asm_amd64.s: 复制参数数量argc和参数值argv到栈上
+
+===初始化g0执行栈==
+asm_amd64.s -> asm_amd64.s: g0是为了调度协程而产生的协程
+asm_amd64.s -> asm_amd64.s: g0是每个Go程序的第一个协程
+
+===运行时检测==
+asm_amd64.s -> runtime1.go: runtime·check
+runtime1.go -> runtime1.go: 检查各种类型长度
+runtime1.go -> runtime1.go: 检查指针操作
+runtime1.go -> runtime1.go: 检查结构体字段的偏移量
+runtime1.go -> runtime1.go: 检查atomic原子操作
+runtime1.go -> runtime1.go: 检查CAS操作
+runtime1.go -> runtime1.go: 检查栈大小是否是2的幂次
+
+===参数初始化,对命令行中的参数进行处理==
+asm_amd64.s -> runtime1.go: runtime·args
+runtime1.go -> runtime1.go: 参数数量赋值给argc int32
+runtime1.go -> runtime1.go: 参数值赋值给argv **byte
+
+
+===os初始化==
+asm_amd64.s -> os_plan9.go: runtime·osinit
+
+===调度器初始化==
+asm_amd64.s -> proc.go: runtime.schedinit
+proc.go -> proc.go: 全局栈空间内存分配
+proc.go -> proc.go: 加载命令行参数到os.Args
+proc.go -> proc.go: 堆内存空间初始化
+proc.go -> proc.go: 加载操作系统环境变量
+proc.go -> proc.go: 初始化当前系统线程
+proc.go -> proc.go: 垃圾回收器的参数初始化
+proc.go -> proc.go: 算法初始化（map、hash）
+proc.go -> proc.go: 设置process数量
+
+
+
+
+===创建主协程==
+asm_amd64.s -> asm_amd64.s: 创建一个新协程，执行runtime.main
+asm_amd64.s -> asm_amd64.s: 放入调度器等待调度
+
+===初始化M==
+asm_amd64.s -> proc.go: mstart0初始化一个M，用来调度主协程
+
+===主协程执行主函数===
+asm_amd64.s -> proc.go: runtime·main主协程执行主函数
+proc.go -> proc.go: 执行runtime包中的init方法
+proc.go -> proc.go: 启动GC垃圾收集器
+proc.go -> proc.go: 执行用户包依赖的init方法
+proc.go -> proc.go: 执行用户主函数main_main
+
+
+@enduml
