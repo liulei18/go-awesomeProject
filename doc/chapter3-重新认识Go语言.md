@@ -155,7 +155,70 @@ go build -n:输出编译过程
 1. rt0_linux_amd64.s文件 
 * 调用方法_rt0_amd64
 2. asm_amd64.s文件
-* 
 
-## Go是面向对象的吗？
-Yes and no 
+## 3-5Go是面向对象的吗？
+### Yes and no
+1. Go是允许OO的编程风格
+2. Go的Struct可以看作其他语言的Class
+3. Go缺乏其它语言的继承结构
+
+### Go的“类”
+1. 其他语言中，往往使用class表示一类数据
+2. class的每个实例称做“对象”
+3. Go是用struct表示一类数据
+4. struct的每个实例并不是“对象”，而是此类型的“值”
+5. struct也可以定义方法
+
+### Go的继承
+1. Go并没有继承关系
+2. 所谓Go的继承只是组合
+2. 组合中的匿名字段，通过语法糖达成了类似继承的效果
+
+### Go的接口
+1. 接口可以定义Go中的一组行为相似的struct
+2. struct并不显示实现接口，而是隐式实现
+
+### 总结
+1. Go没有对象、没有类、没有继承
+2. Go通过组合匿名字段来达到类似继承的效果
+3. 通过以上手段去掉了面向对象中复杂而冗余的部分
+4. 保留了基本的面向对象特性
+
+## 3-6企业级Go项目包管理方法
+### Go包管理困境
+1. 没有统一的包管理方式
+2. 包之间的依赖关系难以维护
+3. 如果同时需要一个包的不同版本，非常麻烦
+
+### 尝试解决
+1. 尝试使用godep、govendor、glide等解决
+2. 为彻底解决GOPATH存在的问题
+3. 使用起来麻烦
+
+### Go Modules
+1. 本质上，一个Go包就是一个项目的源码
+2. gomod的作用：将Go包和Git项目关联起来
+3. GO包的版本就是git项目的Tag
+4. gomod就是解决 “需要哪个git项目的什么版本”
+
+### Github无法访问怎么办
+go env -w GOPROXY=https://goproxy.cn,direct
+
+### 想用本地文件替代怎么办？
+1. go.mod文件追加：replace github.com/Jeffial/tunny => xxx/xxx
+2. go vender缓存到本地
+* go mod vendor//不是之前的go vendor
+* go build -mod vendor
+
+### 如何创建Go Module
+1. 删除本地go.mod
+* go mod init github.com/liulei18/goliukong
+2. 推送至代码仓库
+3. 增加新版本时，在仓库打新Tag
+
+### 总结
+1. Go Modules将每个包视为一个git项目
+2. gomod就是解决“需要哪个git项目的什么版本“
+3. 无法连接远程仓库时，使用重定向或者mod vender方案
+
+ 
